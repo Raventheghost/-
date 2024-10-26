@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECharts Dynamic Comparison</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+</head>
+<body>
+  <h2 style="text-align: center;">2018-2024特斯拉 比亚迪 蔚来市场份额动态比较（cby制作）</h2>
+  <div id="chart" style="width: 800px; height: 600px; margin: auto;"></div>
+
+  <script>
+    const updateFrequency = 2000;
+    const chart = echarts.init(document.getElementById('chart'));
+
+    const brandColors = {
+      BYD: '#79a7db',
+      Tesla: '#FFA500',
+      NIO: '#63d0d6'
+    };
+
+    const marketData = [
+      { brand: 'BYD', year: 2018, share: 11 },
+      { brand: 'Tesla', year: 2018, share: 1 },
+      { brand: 'NIO', year: 2018, share: 0.8 },
+      { brand: 'BYD', year: 2019, share: 17 },
+      { brand: 'Tesla', year: 2019, share: 2 },
+      { brand: 'NIO', year: 2019, share: 1 },
+      { brand: 'BYD', year: 2020, share: 22 },
+      { brand: 'Tesla', year: 2020, share: 11 },
+      { brand: 'NIO', year: 2020, share: 1.6 },
+      { brand: 'BYD', year: 2021, share: 27 },
+      { brand: 'Tesla', year: 2021, share: 10.9 },
+      { brand: 'NIO', year: 2021, share: 2.5 },
+      { brand: 'BYD', year: 2022, share: 30 },
+      { brand: 'Tesla', year: 2022, share: 8.4 },
+      { brand: 'NIO', year: 2022, share: 2 },
+      { brand: 'BYD', year: 2023, share: 35 },
+      { brand: 'Tesla', year: 2023, share: 7.8 },
+      { brand: 'NIO', year: 2023, share: 2.1 },
+      { brand: 'BYD', year: 2024, share: 30.8 },
+      { brand: 'Tesla', year: 2024, share: 6.6 },
+      { brand: 'NIO', year: 2024, share: 2.1 }
+    ];
+
+    const years = [...new Set(marketData.map(d => d.year))];
+    let startIndex = 0;
+
+    const option = {
+      grid: { top: 10, bottom: 30, left: 150, right: 80 },
+      xAxis: {
+        max: 'dataMax',
+        axisLabel: { formatter: n => `${n}%` }
+      },
+      yAxis: {
+        type: 'category',
+        inverse: true,
+        axisLabel: {
+          show: true,
+          fontSize: 14
+        }
+      },
+      series: [{
+        type: 'bar',
+        realtimeSort: true,
+        seriesLayoutBy: 'column',
+        itemStyle: {
+          color: param => brandColors[param.value[0]] || '#5470c6'
+        },
+        encode: { x: 1, y: 0 },
+        label: {
+          show: true,
+          position: 'right',
+          valueAnimation: true
+        }
+      }],
+      animationDuration: 0,
+      animationDurationUpdate: updateFrequency,
+      animationEasing: 'linear',
+      animationEasingUpdate: 'linear',
+      graphic: {
+        elements: [{
+          type: 'text',
+          right: 160,
+          bottom: 60,
+          style: {
+            text: years[startIndex],
+            font: 'bolder 80px monospace',
+            fill: 'rgba(100, 100, 100, 0.25)'
+          },
+          z: 100
+        }]
+      }
+    };
+
+    chart.setOption(option);
+
+    function updateYear(year) {
+      const source = marketData.filter(d => d.year === year);
+      option.series[0].data = source.map(d => [d.brand, d.share]);
+      option.graphic.elements[0].style.text = year;
+      chart.setOption(option);
+    }
+
+    for (let i = startIndex; i < years.length; ++i) {
+      setTimeout(() => updateYear(years[i]), (i - startIndex) * updateFrequency);
+    }
+  </script>
+</body>
+</html>
